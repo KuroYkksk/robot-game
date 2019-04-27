@@ -71,10 +71,12 @@ bool BombGamePlugin::bombJudge(int64_t group, string message)
 	else if (low < judge && judge < bombNumber) {
 		low = judge;
 		return false;
-	}else if (bombNumber < judge && judge < high) {
+	}
+	else if (bombNumber < judge && judge < high) {
 		high = judge;
 		return false;
-	}else {
+	}
+	else {
 		CQ_sendGroupMsg(authCode(), group, "【数字超出范围，请重新输入！】");
 		bombTurn--;
 		return false;
@@ -86,7 +88,7 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 	string bombHint;			//发送游戏提示
 	bool bombInclude = false;	//检查玩家是否已报名
 	//当第一个字符是*时读取指令
-	if (msg.msg.substr(0, 1) == "*")
+	if (msg.msg.substr(0, 5) == "*bomb")
 	{
 		if (msg.msg == "*bomb join")
 		{
@@ -182,43 +184,43 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 			bombReset();
 			CQ_sendGroupMsg(authCode(), msg.fromGroup, "【数字炸弹重置完成】");
 		}
-		else if (msg.msg.substr(0, 3) == "**b")
-		{
-			if (bombGame == true) {
-				if (bombPlayer[bombTurn] == msg.fromQQ)
+	}
+	//游戏中
+	if (msg.msg.substr(0, 3) == "**b")
+	{
+		if (bombGame == true) {
+			if (bombPlayer[bombTurn] == msg.fromQQ)
+			{
+				if (bombJudge(msg.fromGroup, msg.msg))
 				{
-					if (bombJudge(msg.fromGroup, msg.msg))
-					{
-						bombHint = "【嘭————————】\n[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]\n被禁言1分钟\n游戏结束";
-						CQ_setGroupBan(authCode(), msg.fromGroup, msg.fromQQ, 60);//禁言60s
-						CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
-						bombReset();
-					}
-					else
-					{
-						bombTurn++;
-						//玩家循环
-						if (bombTurn == players) {
-							bombTurn = 0;
-						}
-						bombHint = "【" + to_string(low) + "】——>【" + to_string(high) + "】\n";
-						bombHint += "【轮到[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]猜数】";
-						CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
-					}
+					bombHint = "【嘭————————】\n[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]\n被禁言1分钟\n游戏结束";
+					CQ_setGroupBan(authCode(), msg.fromGroup, msg.fromQQ, 60);//禁言60s
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
+					bombReset();
 				}
-				else {
-					CQ_sendGroupMsg(authCode(), msg.fromGroup, "【你未参加游戏，或尚未轮到你的回合】");
+				else
+				{
+					bombTurn++;
+					//玩家循环
+					if (bombTurn == players) {
+						bombTurn = 0;
+					}
+					bombHint = "【" + to_string(low) + "】——>【" + to_string(high) + "】\n";
+					bombHint += "【轮到[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]猜数】";
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
 				}
 			}
-			else if (bombGame == false)
-			{
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "【游戏尚未开始】");
+			else {
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "【你未参加游戏，或尚未轮到你的回合】");
 			}
 		}
-
+		else if (bombGame == false)
+		{
+			CQ_sendGroupMsg(authCode(), msg.fromGroup, "【游戏尚未开始】");
+		}
 	}
 }
 
 BombGamePlugin::BombGamePlugin(Channel<std::unique_ptr<Event>>* ptr)
-:Plugin(ptr){}
+	:Plugin(ptr) {}
 
