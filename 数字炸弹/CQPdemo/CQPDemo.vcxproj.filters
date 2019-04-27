@@ -36,6 +36,9 @@
     <ClCompile Include="src\plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\plug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cqp.h">
@@ -75,6 +78,12 @@
       <Filter>Header Files\events</Filter>
     </ClInclude>
     <ClInclude Include="src\setAuthCodeEvent.h">
+      <Filter>Header Files\events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\events.h">
       <Filter>Header Files\events</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,9 +4,15 @@ struct Event {
 
 	//事件类型
 	enum class Type {
+		//酷Q启动/关闭
+		startup,
+		shutdown,
+		//插件启动/关闭
 		enabled,
 		disabled,
+		//设置AuthCode
 		setAuthCode,
+		//收到群聊
 		groupMessage
 	};
 

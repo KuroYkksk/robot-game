@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClCompile Include="src\appmain.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\plug.cpp" />
     <ClCompile Include="src\plugin.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\ThreadBase.cpp" />
@@ -95,8 +96,10 @@
     <ClInclude Include="src\disabledEvent.h" />
     <ClInclude Include="src\enabledEvent.h" />
     <ClInclude Include="src\event.h" />
+    <ClInclude Include="src\events.h" />
     <ClInclude Include="src\groupMessageEvent.h" />
     <ClInclude Include="src\groupMsg.h" />
+    <ClInclude Include="src\plug.h" />
     <ClInclude Include="src\plugin.h" />
     <ClInclude Include="src\setAuthCodeEvent.h" />
     <ClInclude Include="src\stdafx.h" />
