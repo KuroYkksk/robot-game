@@ -89,10 +89,16 @@
     <ClCompile Include="src\ThreadBase.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\appmain.h" />
+    <ClInclude Include="src\appinfo.h" />
     <ClInclude Include="src\channel.h" />
     <ClInclude Include="src\cqp.h" />
+    <ClInclude Include="src\disabledEvent.h" />
+    <ClInclude Include="src\enabledEvent.h" />
+    <ClInclude Include="src\event.h" />
+    <ClInclude Include="src\groupMessageEvent.h" />
+    <ClInclude Include="src\groupMsg.h" />
     <ClInclude Include="src\plugin.h" />
+    <ClInclude Include="src\setAuthCodeEvent.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\ThreadBase.h" />
