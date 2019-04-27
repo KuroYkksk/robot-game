@@ -6,43 +6,35 @@
 
 #include "stdafx.h"
 #include <string>
+#include <thread>
 
 #include "cqp.h"
-#include "appmain.h" //应用AppID等信息，请正确填写，否则酷Q可能无法加载
+#include "appinfo.h" //应用AppID等信息，请正确填写，否则酷Q可能无法加载
 
 #include "plugin.h"
 #include "channel.h"
 
+#include "plugin.h"
+#include "bombGamePlugin.h"
+
+#include "events.h"
+
 using namespace std;
 
-int ac = -1; //AuthCode 调用酷Q的方法时需要用到
-bool enabled = false;
+//消息管道构造
+Channel<std::unique_ptr<Event>>* channel() {
+	static Channel<std::unique_ptr<Event>> channel;
+	return &channel;
+}
 
-//单例集合,保证构造的时候线程安全
-class SingletonManager {
-public:
+//构造函数，负责创造Plugin实例
+//插件要到这里改构造函数
+Plugin* plugin() {
+	static BombGamePlugin plugin(channel());
+	return &plugin;
+}
 
-	static SingletonManager* manager() {
-		static SingletonManager manager;
-		return &manager;
-	}
-
-	Channel<GroupMsg>* channel() {
-		return m_channel.get();
-	}
-
-	Plugin* msgSub() {
-		return m_msgsub.get();
-	}
-
-private:
-	SingletonManager() {
-		m_channel = std::make_unique<Channel<GroupMsg>>();
-		m_msgsub = std::make_unique<Plugin>(m_channel.get());
-	}
-	std::unique_ptr<Channel<GroupMsg>> m_channel;
-	std::unique_ptr<Plugin> m_msgsub;
-};
+std::unique_ptr<std::thread> pluginThread;
 
 /*
 * 返回应用的ApiVer、Appid，打包后将不会调用
@@ -57,7 +49,7 @@ CQEVENT(const char*, AppInfo, 0)() {
 * 不要在本函数处理其他任何代码，以免发生异常情况。如需执行初始化代码请在Startup事件中执行（Type=1001）。
 */
 CQEVENT(int32_t, Initialize, 4)(int32_t AuthCode) {
-	ac = AuthCode;
+	channel()->put(std::make_unique<SetAuthCodeEvent>(AuthCode));
 	return 0;
 }
 
@@ -69,7 +61,12 @@ CQEVENT(int32_t, Initialize, 4)(int32_t AuthCode) {
 */
 CQEVENT(int32_t, __eventStartup, 0)() {
 	//启动消息处理线程
-	SingletonManager::manager()->msgSub()->start();
+	Plugin* p = plugin();
+	pluginThread = std::make_unique<std::thread>([p]() {
+		p->runEventLoop();
+	});
+	//发送启动消息
+	channel()->put(std::make_unique<InitEvent>());
 	return 0;
 }
 
@@ -80,8 +77,11 @@ CQEVENT(int32_t, __eventStartup, 0)() {
 * 本函数调用完毕后，酷Q将很快关闭，请不要再通过线程等方式执行其他代码。
 */
 CQEVENT(int32_t, __eventExit, 0)() {
-	//回收资源
-	SingletonManager::manager()->msgSub()->quit();
+	//发送终止信息
+	channel()->put(std::make_unique<ExitEvent>());
+	//等待线程结束
+	pluginThread->join();
+	pluginThread.reset();
 	return 0;
 }
 
@@ -92,7 +92,7 @@ CQEVENT(int32_t, __eventExit, 0)() {
 * 如非必要，不建议在这里加载窗口。（可以添加菜单，让用户手动打开窗口）
 */
 CQEVENT(int32_t, __eventEnable, 0)() {
-	enabled = true;
+	channel()->put(std::make_unique<EnabledEvent>());
 	return 0;
 }
 
@@ -104,7 +104,7 @@ CQEVENT(int32_t, __eventEnable, 0)() {
 * 无论本应用是否被启用，酷Q关闭前本函数都*不会*被调用。
 */
 CQEVENT(int32_t, __eventDisable, 0)() {
-	enabled = false;
+	channel()->put(std::make_unique<DisabledEvent>());
 	return 0;
 }
 
@@ -114,7 +114,6 @@ CQEVENT(int32_t, __eventDisable, 0)() {
 * subType 子类型，11/来自好友 1/来自在线状态 2/来自群 3/来自讨论组
 */
 CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t fromQQ, const char *msg, int32_t font) {
-
 	//如果要回复消息，请调用酷Q方法发送，并且这里 return EVENT_BLOCK - 截断本条消息，不再继续处理  注意：应用优先级设置为"最高"(10000)时，不得使用本返回值
 	//如果不回复消息，交由之后的应用/过滤器处理，这里 return EVENT_IGNORE - 忽略本条消息
 	return EVENT_IGNORE;
@@ -126,7 +125,7 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t 
 */
 CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fromGroup, int64_t fromQQ, const char *fromAnonymous, const char *msg, int32_t font) {
 	//抛入消息
-	SingletonManager::manager()->channel()->put(GroupMsg(msgId, fromGroup, fromQQ, msg));
+	channel()->put(std::make_unique<GroupMessageEvent>(msgId, fromGroup, fromQQ, msg));
 	return EVENT_IGNORE; //关于返回值说明, 见“_eventPrivateMsg”函数
 }
 

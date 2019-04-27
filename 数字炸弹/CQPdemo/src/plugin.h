@@ -1,40 +1,30 @@
 #pragma once
-#include <string>
-#include <queue>
-#include "ThreadBase.h"
+
+#include<memory>
+
 #include "channel.h"
-#include <map>
+#include "events.h"
 
-struct GroupMsg
-{
-	int32_t msgId;
-	int64_t fromGroup;
-	int64_t fromQQ;
-	std::string msg;
-
-	GroupMsg()
-	{}
-
-	GroupMsg(int32_t msgId, int64_t fromGroup, int64_t fromQQ, std::string msg)
-		:msgId(msgId), fromQQ(fromQQ), fromGroup(fromGroup), msg(msg) {}
-};
-
-class Plugin :
-	public ThreadBase
-{
+class Plugin {
 public:
-	Plugin(Channel<GroupMsg>* channel);
-	~Plugin();
+	Plugin(Channel<std::unique_ptr<Event>>*);
+	virtual ~Plugin() {};
 
-	void start();
-	void quite();
-	void pushMsg(int32_t msgId, int64_t fromGroup, int64_t fromQQ, std::string msg);
+	//让线程运行的循环
+	void runEventLoop();
+protected:
+
+	int32_t authCode() {
+		return m_authCode;
+	}
+
+	//事件处理函数，默认什么都不做
+	virtual void onInit() {};
+	virtual void onExit() {};
+	virtual void onEnabled() {};
+	virtual void onDisabled() {};
+	virtual void onGroupMessage(const GroupMessageEvent& event) {};
 private:
-	virtual void threadMain();
-private:
-	bool m_quit;   //是否退出
-	Channel<GroupMsg>* m_channel;//获取信息的通道
+	int32_t m_authCode;
+	Channel<std::unique_ptr<Event>>* m_eventChannel;
 };
-
-
-
