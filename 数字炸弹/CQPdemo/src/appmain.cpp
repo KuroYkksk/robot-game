@@ -1,24 +1,50 @@
 /*
-* CoolQ Demo for VC++ 
+* CoolQ Demo for VC++
 * Api Version 9
 * Written by Coxxs & Thanks for the help of orzFly
 */
 
 #include "stdafx.h"
-#include "string"
+#include <string>
+
 #include "cqp.h"
 #include "appmain.h" //应用AppID等信息，请正确填写，否则酷Q可能无法加载
+
 #include "MsgSub.h"
-#include "TransactionManagement.h"
+#include "channel.h"
+
 using namespace std;
 
 int ac = -1; //AuthCode 调用酷Q的方法时需要用到
 bool enabled = false;
 
+//单例集合,保证构造的时候线程安全
+class SingletonManager {
+public:
 
-GroupMsgSub * groupMsgSub = TransactionManagement::getInstance()->getGroupMsgSubInstance();
+	static SingletonManager* manager() {
+		static SingletonManager manager;
+		return &manager;
+	}
 
-/* 
+	Channel<GroupMsg>* channel() {
+		return m_channel.get();
+	}
+
+	Plugin* msgSub() {
+		return m_msgsub.get();
+	}
+
+private:
+	SingletonManager() {
+		m_channel = std::make_unique<Channel<GroupMsg>>();
+		m_msgsub = std::make_unique<Plugin>(m_channel.get());
+	}
+	std::unique_ptr<Channel<GroupMsg>> m_channel;
+	std::unique_ptr<Plugin> m_msgsub;
+};
+
+/*
 * 返回应用的ApiVer、Appid，打包后将不会调用
 */
 CQEVENT(const char*, AppInfo, 0)() {
@@ -26,7 +52,7 @@ CQEVENT(const char*, AppInfo, 0)() {
 }
 
 
-/* 
+/*
 * 接收应用AuthCode，酷Q读取应用信息后，如果接受该应用，将会调用这个函数并传递AuthCode。
 * 不要在本函数处理其他任何代码，以免发生异常情况。如需执行初始化代码请在Startup事件中执行（Type=1001）。
 */
@@ -43,7 +69,7 @@ CQEVENT(int32_t, Initialize, 4)(int32_t AuthCode) {
 */
 CQEVENT(int32_t, __eventStartup, 0)() {
 	//启动消息处理线程
-	groupMsgSub->start();
+	SingletonManager::manager()->msgSub()->start();
 	return 0;
 }
 
@@ -55,10 +81,7 @@ CQEVENT(int32_t, __eventStartup, 0)() {
 */
 CQEVENT(int32_t, __eventExit, 0)() {
 	//回收资源
-	if (groupMsgSub!=nullptr)
-	{
-		groupMsgSub->quite();
-	}
+	SingletonManager::manager()->msgSub()->quit();
 	return 0;
 }
 
@@ -103,7 +126,7 @@ CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t 
 */
 CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fromGroup, int64_t fromQQ, const char *fromAnonymous, const char *msg, int32_t font) {
 	//抛入消息
-	groupMsgSub->pushMsg(msgId, fromGroup, fromQQ, msg);
+	SingletonManager::manager()->channel()->put(GroupMsg(msgId, fromGroup, fromQQ, msg));
 	return EVENT_IGNORE; //关于返回值说明, 见“_eventPrivateMsg”函数
 }
 
@@ -195,11 +218,11 @@ CQEVENT(int32_t, __eventRequest_AddGroup, 32)(int32_t subType, int32_t sendTime,
 * 如果不使用菜单，请在 .json 及此处删除无用菜单
 */
 CQEVENT(int32_t, __menuA, 0)() {
-	MessageBoxA(NULL, "这是menuA，在这里载入窗口，或者进行其他工作。", "" ,0);
+	MessageBoxA(NULL, "这是menuA，在这里载入窗口，或者进行其他工作。", "", 0);
 	return 0;
 }
 
 CQEVENT(int32_t, __menuB, 0)() {
-	MessageBoxA(NULL, "这是menuB，在这里载入窗口，或者进行其他工作。", "" ,0);
+	MessageBoxA(NULL, "这是menuB，在这里载入窗口，或者进行其他工作。", "", 0);
 	return 0;
 }

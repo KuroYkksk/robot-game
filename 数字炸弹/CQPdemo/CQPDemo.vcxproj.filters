@@ -30,10 +30,7 @@
     <ClCompile Include="src\appmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MsgSub.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TransactionManagement.cpp">
+    <ClCompile Include="src\plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +50,10 @@
     <ClInclude Include="src\ThreadBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MsgSub.h">
+    <ClInclude Include="src\channel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\TransactionManagement.h">
+    <ClInclude Include="src\plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
