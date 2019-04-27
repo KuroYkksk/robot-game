@@ -84,8 +84,8 @@
   <ItemGroup>
     <ClCompile Include="src\appmain.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
-    <ClCompile Include="src\plug.cpp" />
     <ClCompile Include="src\plugin.cpp" />
+    <ClCompile Include="src\bombGamePlugin.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\ThreadBase.cpp" />
   </ItemGroup>
@@ -97,10 +97,12 @@
     <ClInclude Include="src\enabledEvent.h" />
     <ClInclude Include="src\event.h" />
     <ClInclude Include="src\events.h" />
+    <ClInclude Include="src\exitEvent.h" />
     <ClInclude Include="src\groupMessageEvent.h" />
     <ClInclude Include="src\groupMsg.h" />
-    <ClInclude Include="src\plug.h" />
+    <ClInclude Include="src\initEvent.h" />
     <ClInclude Include="src\plugin.h" />
+    <ClInclude Include="src\bombGamePlugin.h" />
     <ClInclude Include="src\setAuthCodeEvent.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />

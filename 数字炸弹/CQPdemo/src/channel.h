@@ -26,7 +26,7 @@ public:
 	bool get(T& element) {
 		std::lock_guard<std::mutex> lock(m_mutex);
 		if (m_buffer.size() != 0) {
-			element = m_buffer.front();
+			element = std::move(m_buffer.front());
 			m_buffer.pop();
 			return true;
 		}

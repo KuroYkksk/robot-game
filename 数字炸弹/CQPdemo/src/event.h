@@ -1,12 +1,12 @@
-
+#pragma once
 //代表一个发给酷Q应用的抽象事件
 struct Event {
 
 	//事件类型
 	enum class Type {
 		//酷Q启动/关闭
-		startup,
-		shutdown,
+		init,
+		exit,
 		//插件启动/关闭
 		enabled,
 		disabled,
