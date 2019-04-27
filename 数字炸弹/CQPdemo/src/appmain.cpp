@@ -10,7 +10,7 @@
 #include "cqp.h"
 #include "appmain.h" //应用AppID等信息，请正确填写，否则酷Q可能无法加载
 
-#include "MsgSub.h"
+#include "plugin.h"
 #include "channel.h"
 
 using namespace std;
