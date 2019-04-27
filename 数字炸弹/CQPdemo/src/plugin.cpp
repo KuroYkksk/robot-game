@@ -2,7 +2,7 @@
 
 #include "plugin.h"
 
-//Ñ­»·¸ºÔğ·Ö·¢ËùÓĞµÄÊÂ¼ş
+//å¾ªç¯è´Ÿè´£åˆ†å‘æ‰€æœ‰çš„äº‹ä»¶
 void Plugin::runEventLoop()
 {
 	bool keepRunning = true;
@@ -15,7 +15,7 @@ void Plugin::runEventLoop()
 				break;
 			case Event::Type::exit:
 				onExit();
-				keepRunning = false;//ÍË³ö
+				keepRunning = false;//é€€å‡º
 				break;
 			case Event::Type::enabled:
 				onEnabled();
@@ -41,4 +41,5 @@ void Plugin::runEventLoop()
 Plugin::Plugin(Channel<std::unique_ptr<Event>>* channel)
 	:m_eventChannel(channel)
 {
+		
 }
