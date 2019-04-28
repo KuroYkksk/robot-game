@@ -1,4 +1,3 @@
-
 #include "plugin.h"
 #include "cqp.h"
 #include <time.h>
@@ -165,11 +164,23 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 		else if (msg.msg == "*bomb start")
 		{
 			if (bombGame == false) {
+
+				//检查玩家是否已报名
+				for (int i = 0; i < 10; i++)
+				{
+					if (bombPlayer[i] == msg.fromQQ)
+					{
+						bombInclude = true;
+						break;
+					}
+					bombInclude = false;
+				}
+				
 				if (players < 2)
 				{
 					CQ_sendGroupMsg(authCode(), msg.fromGroup, "【开始失败，玩家不足】");
 				}
-				else {
+				else if (bombInclude) {
 					Disorder(bombPlayer, players);
 					bombStart(msg.fromGroup);
 					bombHint = "【首先由[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]猜数】";
