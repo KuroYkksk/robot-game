@@ -1,3 +1,4 @@
+
 #include "plugin.h"
 #include "cqp.h"
 #include <time.h>
@@ -6,31 +7,31 @@
 using namespace std;
 
 
-int players = 0;			//Íæ¼ÒÊı
-bool bombGame = false;		 //ÅĞ¶ÏÓÎÏ·ÊÇ·ñ¿ªÊ¼µÄ±êÖ¾
-int64_t bombPlayer[10] = { 0 };//²Î¼ÓÓÎÏ·µÄÍæ¼Ò
-int bombNumber = -1;			//Õ¨µ¯Êı×Ö£¬³õÊ¼»¯Îª-1
-int bombTurn = -1;			//²ÂÊı»ØºÏ
-int low = 1;		//³õÊ¼»¯ÉÏÏÂ½ç
+int players = 0;			//ç©å®¶æ•°
+bool bombGame = false;		 //åˆ¤æ–­æ¸¸æˆæ˜¯å¦å¼€å§‹çš„æ ‡å¿—
+int64_t bombPlayer[10] = { 0 };//å‚åŠ æ¸¸æˆçš„ç©å®¶
+int bombNumber = -1;			//ç‚¸å¼¹æ•°å­—ï¼Œåˆå§‹åŒ–ä¸º-1
+int bombTurn = -1;			//çŒœæ•°å›åˆ
+int low = 1;		//åˆå§‹åŒ–ä¸Šä¸‹ç•Œ
 int high = 100;
 
-//ÓÎÏ·¿ªÊ¼
+//æ¸¸æˆå¼€å§‹
 void BombGamePlugin::bombStart(int64_t group)
 {
 	bombGame = true;
 	srand((unsigned)time(NULL));
-	bombNumber = rand() % (99 - 2 + 1) + 2;	//Éú³É[2,99]µÄËæ»úÊı
+	bombNumber = rand() % (99 - 2 + 1) + 2;	//ç”Ÿæˆ[2,99]çš„éšæœºæ•°
 	low = 1;
 	high = 100;
 	bombTurn = 0;
-	string bombHint = "¡¾ĞÄÌø~½ûÑÔÊı×ÖÕ¨µ¯¡¿ÓÎÏ·¿ªÊ¼\nÊı×ÖÒÑ¾­Éú³É~\n¡¾1¡¿¡ª¡ª>¡¾100¡¿";
+	string bombHint = "ã€å¿ƒè·³~ç¦è¨€æ•°å­—ç‚¸å¼¹ã€‘æ¸¸æˆå¼€å§‹\næ•°å­—å·²ç»ç”Ÿæˆ~\nã€1ã€‘â€”â€”>ã€100ã€‘\n";
 	for (int i = 0; i < players; i++)
 	{
 		bombHint += "[CQ:at,qq=" + to_string(bombPlayer[i]) + "]";
 	}
 	CQ_sendGroupMsg(authCode(), group, bombHint.c_str());
 }
-//ÓÎÏ·ÖØÖÃ
+//æ¸¸æˆé‡ç½®
 void bombReset()
 {
 	bombGame = false;
@@ -45,7 +46,7 @@ void bombReset()
 	high = 100;
 }
 
-//Íæ¼ÒÂÒĞòËã·¨
+//ç©å®¶ä¹±åºç®—æ³•
 void Disorder(int64_t Player[], int player)
 {
 	int index, i;
@@ -60,7 +61,7 @@ void Disorder(int64_t Player[], int player)
 	}
 }
 
-//Õ¨µ¯ÅĞ¶Ï
+//ç‚¸å¼¹åˆ¤æ–­
 bool BombGamePlugin::bombJudge(int64_t group, string message)
 {
 	int judge;
@@ -77,7 +78,7 @@ bool BombGamePlugin::bombJudge(int64_t group, string message)
 		return false;
 	}
 	else {
-		CQ_sendGroupMsg(authCode(), group, "¡¾Êı×Ö³¬³ö·¶Î§£¬ÇëÖØĞÂÊäÈë£¡¡¿");
+		CQ_sendGroupMsg(authCode(), group, "ã€æ•°å­—è¶…å‡ºèŒƒå›´ï¼Œè¯·é‡æ–°è¾“å…¥å“¦~ã€‘");
 		bombTurn--;
 		return false;
 	}
@@ -85,17 +86,17 @@ bool BombGamePlugin::bombJudge(int64_t group, string message)
 
 void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 {
-	string bombHint;			//·¢ËÍÓÎÏ·ÌáÊ¾
-	bool bombInclude = false;	//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
-	//µ±µÚÒ»¸ö×Ö·ûÊÇ*Ê±¶ÁÈ¡Ö¸Áî
+	string bombHint;			//å‘é€æ¸¸æˆæç¤º
+	bool bombInclude = false;	//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
+	//å½“ç¬¬ä¸€ä¸ªå­—ç¬¦æ˜¯*æ—¶è¯»å–æŒ‡ä»¤
 	if (msg.msg.substr(0, 5) == "*bomb")
 	{
 		if (msg.msg == "*bomb join")
 		{
-			//µ±ÓÎÏ·Î´¿ªÊ¼Ê±
+			//å½“æ¸¸æˆæœªå¼€å§‹æ—¶
 			if (bombGame == false) {
 
-				//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
+				//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
 				for (int i = 0; i < 10; i++)
 				{
 					if (bombPlayer[i] == msg.fromQQ)
@@ -108,34 +109,34 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 
 				if (bombInclude)
 				{
-					CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬ÄãÒÑ±¨Ãû¡¿");
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œä½ å·²æŠ¥åã€‘");
 				}
 				else if (players >= 10)
 				{
-					CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬Íæ¼ÒÊıÒÑÂú¡¿");
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œç©å®¶æ•°å·²æ»¡ã€‘");
 				}
 				else
 				{
 					players++;
-					bombHint = "¡¾±¨Ãû³É¹¦£¬µ±Ç°ÓĞ" + to_string(players) + "Î»Íæ¼Ò¡¿";
+					bombHint = "ã€æŠ¥åæˆåŠŸï¼Œå½“å‰æœ‰" + to_string(players) + "ä½ç©å®¶ã€‘";
 					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
-					bombPlayer[players - 1] = msg.fromQQ;	//½«·¢ËÍĞÅÏ¢µÄQQ´æÈëÊı×é
+					bombPlayer[players - 1] = msg.fromQQ;	//å°†å‘é€ä¿¡æ¯çš„QQå­˜å…¥æ•°ç»„
 				}
 			}
 			else {
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 			}
 		}
 		else if (msg.msg == "*bomb quit")
 		{
 			int bombIndex = -1;
-			//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
+			//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
 			for (int i = 0; i < 10; i++)
 			{
 				if (bombPlayer[i] == msg.fromQQ)
 				{
 					bombInclude = true;
-					int bombIndex = -1;
+					bombIndex = i;
 					break;
 				}
 				bombInclude = false;
@@ -143,49 +144,52 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 
 			if (bombGame == true)
 			{
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾È¡Ïû±¨ÃûÊ§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€å–æ¶ˆæŠ¥åå¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 			}
 			else if (bombInclude)
 			{
-				//½«±»È¡Ïû±¨ÃûµÄÍæ¼ÒºóÃæµÄÃ¿¸öÍæ¼ÒÏòÇ°ÒÆ¶¯Ò»Î»
+				//å°†è¢«å–æ¶ˆæŠ¥åçš„ç©å®¶åé¢çš„æ¯ä¸ªç©å®¶å‘å‰ç§»åŠ¨ä¸€ä½
 				for (int i = bombIndex; i < 10; i++)
 				{
 					bombPlayer[i] = i == 9 ? 0 : bombPlayer[i + 1];
 				}
 				players--;
-				bombHint = "¡¾È¡Ïû±¨Ãû³É¹¦£¬µ±Ç°ÓĞ" + to_string(players) + "ÃûÍæ¼Ò¡¿";
+				bombHint = "ã€å–æ¶ˆæŠ¥åæˆåŠŸï¼Œå½“å‰æœ‰" + to_string(players) + "åç©å®¶ã€‘";
 				CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
 			}
 			else {
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾È¡Ïû±¨ÃûÊ§°Ü£¬ÄãÃ»ÓĞ±¨Ãû¡¿");
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€å–æ¶ˆæŠ¥åå¤±è´¥ï¼Œä½ æ²¡æœ‰æŠ¥åã€‘");
 			}
 		}
 
 		else if (msg.msg == "*bomb start")
 		{
 			if (bombGame == false) {
-				if (players < 1)
+				if (players < 2)
 				{
-					CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾¿ªÊ¼Ê§°Ü£¬Íæ¼Ò²»×ã¡¿");
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€å¼€å§‹å¤±è´¥ï¼Œç©å®¶ä¸è¶³ã€‘");
 				}
 				else {
 					Disorder(bombPlayer, players);
 					bombStart(msg.fromGroup);
-					bombHint = "¡¾Ê×ÏÈÓÉ[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]²ÂÊı¡¿";
+					bombHint = "ã€é¦–å…ˆç”±[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]çŒœæ•°ã€‘";
 					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
+				}
+				else {
+					CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€ä½ æ²¡æœ‰æŠ¥åï¼Œè¯·ä¸è¦è¿«å®³ç©å®¶~ã€‘");
 				}
 			}
 			else {
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾¿ªÊ¼Ê§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€å¼€å§‹å¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 			}
 		}
 		else if (msg.msg == "*bomb reset")
 		{
 			bombReset();
-			CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾Êı×ÖÕ¨µ¯ÖØÖÃÍê³É¡¿");
+			CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€æ•°å­—ç‚¸å¼¹é‡ç½®å®Œæˆã€‘");
 		}
 	}
-	//ÓÎÏ·ÖĞ
+	//æ¸¸æˆä¸­
 	if (msg.msg.substr(0, 3) == "**b")
 	{
 		if (bombGame == true) {
@@ -193,34 +197,33 @@ void BombGamePlugin::onGroupMessage(const GroupMessageEvent & msg)
 			{
 				if (bombJudge(msg.fromGroup, msg.msg))
 				{
-					bombHint = "¡¾àØ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡¿\n[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]\n±»½ûÑÔ1·ÖÖÓ\nÓÎÏ·½áÊø";
-					CQ_setGroupBan(authCode(), msg.fromGroup, msg.fromQQ, 60);//½ûÑÔ60s
+					bombHint = "ã€å˜­â€”â€”â€”â€”â€”â€”â€”â€”ã€‘\n[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]\nè¢«ç¦è¨€1åˆ†é’Ÿ\næ¸¸æˆç»“æŸ";
+					CQ_setGroupBan(authCode(), msg.fromGroup, msg.fromQQ, 60);//ç¦è¨€60s
 					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
 					bombReset();
 				}
 				else
 				{
 					bombTurn++;
-					//Íæ¼ÒÑ­»·
+					//ç©å®¶å¾ªç¯
 					if (bombTurn == players) {
 						bombTurn = 0;
 					}
-					bombHint = "¡¾" + to_string(low) + "¡¿¡ª¡ª>¡¾" + to_string(high) + "¡¿\n";
-					bombHint += "¡¾ÂÖµ½[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]²ÂÊı¡¿";
+					bombHint = "ã€" + to_string(low) + "ã€‘â€”â€”>ã€" + to_string(high) + "ã€‘\n";
+					bombHint += "ã€è½®åˆ°[CQ:at,qq=" + to_string(bombPlayer[bombTurn]) + "]çŒœæ•°ã€‘";
 					CQ_sendGroupMsg(authCode(), msg.fromGroup, bombHint.c_str());
 				}
 			}
 			else {
-				CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾ÄãÎ´²Î¼ÓÓÎÏ·£¬»òÉĞÎ´ÂÖµ½ÄãµÄ»ØºÏ¡¿");
+				CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€ä½ æœªå‚åŠ æ¸¸æˆï¼Œæˆ–å°šæœªè½®åˆ°ä½ çš„å›åˆã€‘");
 			}
 		}
 		else if (bombGame == false)
 		{
-			CQ_sendGroupMsg(authCode(), msg.fromGroup, "¡¾ÓÎÏ·ÉĞÎ´¿ªÊ¼¡¿");
+			CQ_sendGroupMsg(authCode(), msg.fromGroup, "ã€æ¸¸æˆå°šæœªå¼€å§‹ã€‘");
 		}
 	}
 }
 
 BombGamePlugin::BombGamePlugin(Channel<std::unique_ptr<Event>>* ptr)
 	:Plugin(ptr) {}
-
