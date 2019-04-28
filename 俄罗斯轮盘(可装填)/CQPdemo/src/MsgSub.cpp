@@ -1,26 +1,27 @@
+
 #include "MsgSub.h"
 #include "cqp.h"
 #include <time.h>
 #include <string>
 using namespace std;
 
-//µ¼ÈëÈ«¾Ö±äÁ¿ ac   ÔÚappmain.h ÖĞ¶¨Òå
+//å¯¼å…¥å…¨å±€å˜é‡ ac   åœ¨appmain.h ä¸­å®šä¹‰
 extern int ac;
 
 
-int players = 0;			//Íæ¼ÒÊı
-bool ruroGame = false;		 //ÅĞ¶ÏÓÎÏ·ÊÇ·ñ¿ªÊ¼µÄ±êÖ¾
-int64_t ruroPlayer[6] = { 0 };//²Î¼ÓÂÖÅÌµÄÍæ¼Ò
-bool bullet[6] = { 0 };			//×Óµ¯µÄÎ»ÖÃ£¬³õÊ¼»¯Îª-1
-int n = -1;							//×Óµ¯ÊıÁ¿
-int shootTurn = -1;			//¿ªÇ¹»ØºÏ
+int players = 0;			//ç©å®¶æ•°
+bool ruroGame = false;		 //åˆ¤æ–­æ¸¸æˆæ˜¯å¦å¼€å§‹çš„æ ‡å¿—
+int64_t ruroPlayer[6] = { 0 };//å‚åŠ è½®ç›˜çš„ç©å®¶
+bool bullet[6] = { 0 };			//å­å¼¹çš„ä½ç½®ï¼Œåˆå§‹åŒ–ä¸º-1
+int n = -1;							//å­å¼¹æ•°é‡
+int shootTurn = -1;			//å¼€æªå›åˆ
 
-//ÓÎÏ·¿ªÊ¼
+//æ¸¸æˆå¼€å§‹
 void ruroStart(int64_t group, string signal)
 {
 	ruroGame = true;
 
-	int load;		//×°ÌîÎ»ÖÃ
+	int load;		//è£…å¡«ä½ç½®
 
 	srand((unsigned)time(NULL));
 	if (signal == "*ruro start")
@@ -28,7 +29,7 @@ void ruroStart(int64_t group, string signal)
 		signal += "1";
 	}
 		sscanf(signal.c_str(), "*ruro start%d", &n);
-		//×°Ìîn·¢×Óµ¯
+		//è£…å¡«nå‘å­å¼¹
 		for (int i = 0; i < n; i++)
 		{
 			load = rand() % 6;
@@ -41,14 +42,14 @@ void ruroStart(int64_t group, string signal)
 		}
 
 	shootTurn = 0;
-	string ruroHint = "¡¾ĞÄÌø~½ûÑÔ¶íÂŞË¹ÂÖÅÌ¡¿ÓÎÏ·¿ªÊ¼\n" + to_string(n) + "·¢×Óµ¯ÒÑ×°Ìî~\n";
+	string ruroHint = "ã€å¿ƒè·³~ç¦è¨€ä¿„ç½—æ–¯è½®ç›˜ã€‘æ¸¸æˆå¼€å§‹\n" + to_string(n) + "å‘å­å¼¹å·²è£…å¡«~\n";
 	for (int i = 0; i < players; i++)
 	{
 		ruroHint += "[CQ:at,qq=" + to_string(ruroPlayer[i]) + "]";
 	}
 	CQ_sendGroupMsg(ac, group, ruroHint.c_str());
 }
-//ÓÎÏ·ÖØÖÃ
+//æ¸¸æˆé‡ç½®
 void ruroReset()
 {
 	ruroGame = false;
@@ -62,7 +63,7 @@ void ruroReset()
 	n = -1;
 }
 
-//Íæ¼ÒÂÒĞòËã·¨
+//ç©å®¶ä¹±åºç®—æ³•
 void Disorder(int64_t Player[], int player)
 {
 	int index, i;
@@ -88,17 +89,17 @@ void GroupMsgSub::threadMain()
 			m_groupMsgBuffer.pop();
 			m_mutex.unlock();
 
-			string ruroHint;			//·¢ËÍÓÎÏ·ÌáÊ¾
-			bool ruroInclude = false;	//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
-			//µ±µÚÒ»¸ö×Ö·ûÊÇ*Ê±¶ÁÈ¡Ö¸Áî
+			string ruroHint;			//å‘é€æ¸¸æˆæç¤º
+			bool ruroInclude = false;	//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
+			//å½“ç¬¬ä¸€ä¸ªå­—ç¬¦æ˜¯*æ—¶è¯»å–æŒ‡ä»¤
 			if (msg.msg.substr(0, 1) == "*")	
 			{
 				if (msg.msg == "*ruro join")
 				{
-					//µ±ÓÎÏ·Î´¿ªÊ¼Ê±
+					//å½“æ¸¸æˆæœªå¼€å§‹æ—¶
 					if (ruroGame == false) {
 
-						//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
+						//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
 						for (int i = 0; i < 6; i++)
 						{
 							if (ruroPlayer[i] == msg.fromQQ)
@@ -111,34 +112,34 @@ void GroupMsgSub::threadMain()
 
 						if (ruroInclude)
 						{
-							CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬ÄãÒÑ±¨Ãû¡¿");
+							CQ_sendGroupMsg(ac, msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œä½ å·²æŠ¥åã€‘");
 						}
 						else if (players >= 6)
 						{
-							CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬Íæ¼ÒÊıÒÑÂú¡¿");
+							CQ_sendGroupMsg(ac, msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œç©å®¶æ•°å·²æ»¡ã€‘");
 						}
 						else
 						{
 							players++;
-							ruroHint = "¡¾±¨Ãû³É¹¦£¬µ±Ç°ÓĞ" + to_string(players) + "Î»Íæ¼Ò¡¿";
+							ruroHint = "ã€æŠ¥åæˆåŠŸï¼Œå½“å‰æœ‰" + to_string(players) + "ä½ç©å®¶ã€‘";
 							CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
-							ruroPlayer[players - 1] = msg.fromQQ;	//½«·¢ËÍĞÅÏ¢µÄQQ´æÈëÊı×é
+							ruroPlayer[players - 1] = msg.fromQQ;	//å°†å‘é€ä¿¡æ¯çš„QQå­˜å…¥æ•°ç»„
 						}
 					}
 					else {
-						CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾±¨ÃûÊ§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+						CQ_sendGroupMsg(ac, msg.fromGroup, "ã€æŠ¥åå¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 					}
 				}
 				else if (msg.msg == "*ruro quit")
 				{
 					int ruroIndex = -1;
-					//¼ì²éÍæ¼ÒÊÇ·ñÒÑ±¨Ãû
+					//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
 					for (int i = 0; i < 6; i++)
 					{
 						if (ruroPlayer[i] == msg.fromQQ)
 						{
 							ruroInclude = true;
-							int ruroIndex = -1;
+							ruroIndex = i;
 							break;
 						}
 						ruroInclude = false;
@@ -146,49 +147,64 @@ void GroupMsgSub::threadMain()
 
 					if (ruroGame == true)
 					{
-						CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾È¡Ïû±¨ÃûÊ§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+						CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å–æ¶ˆæŠ¥åå¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 					}
 					else if (ruroInclude)
 					{
-						//½«±»È¡Ïû±¨ÃûµÄÍæ¼ÒºóÃæµÄÃ¿¸öÍæ¼ÒÏòÇ°ÒÆ¶¯Ò»Î»
+						//å°†è¢«å–æ¶ˆæŠ¥åçš„ç©å®¶åé¢çš„æ¯ä¸ªç©å®¶å‘å‰ç§»åŠ¨ä¸€ä½
 						for (int i = ruroIndex; i < 6; i++)
 						{
 							ruroPlayer[i] = i == 5 ? 0 : ruroPlayer[i + 1];
 						}
 						players--;
-						ruroHint = "¡¾È¡Ïû±¨Ãû³É¹¦£¬µ±Ç°ÓĞ" + to_string(players) + "ÃûÍæ¼Ò¡¿";
+						ruroHint = "ã€å–æ¶ˆæŠ¥åæˆåŠŸï¼Œå½“å‰æœ‰" + to_string(players) + "åç©å®¶ã€‘";
 						CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
 					}
 					else {
-						CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾È¡Ïû±¨ÃûÊ§°Ü£¬ÄãÃ»ÓĞ±¨Ãû¡¿");
+						CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å–æ¶ˆæŠ¥åå¤±è´¥ï¼Œä½ æ²¡æœ‰æŠ¥åã€‘");
 					}
 				}
 				else if (msg.msg == "*ruro start6")
 				{
-					CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾×Óµ¯ÒÑÂú£¬ÇëÖØĞÂ×°Ìî¡¿");
+					CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å­å¼¹å·²æ»¡ï¼Œè¯·é‡æ–°è£…å¡«ã€‘");
 				}
 				else if (msg.msg == "*ruro start" || msg.msg == "*ruro start1" || msg.msg == "*ruro start2" || msg.msg == "*ruro start3" || msg.msg == "*ruro start4"|| msg.msg == "*ruro start5")
 				{
 					if (ruroGame == false) {
+
+						//æ£€æŸ¥ç©å®¶æ˜¯å¦å·²æŠ¥å
+						for (int i = 0; i < 10; i++)
+						{
+							if (ruroPlayer[i] == msg.fromQQ)
+							{
+								ruroInclude = true;
+								break;
+							}
+							ruroInclude = false;
+						}
+
 						if (players < 1)
 						{
-							CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾¿ªÊ¼Ê§°Ü£¬Íæ¼Ò²»×ã¡¿");
+							CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å¼€å§‹å¤±è´¥ï¼Œç©å®¶ä¸è¶³ã€‘");
 						}
-						else {
+						else if (ruroInclude) {
 							Disorder(ruroPlayer, players);
 							ruroStart(msg.fromGroup, msg.msg);
-							ruroHint = "¡¾Ê×ÏÈÓÉ[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]¿ªÇ¹¡¿";
+							ruroHint = "ã€é¦–å…ˆç”±[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]å¼€æªã€‘";
 							CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
+						}
+						else {
+							CQ_sendGroupMsg(ac, msg.fromGroup, "ã€ä½ æ²¡æœ‰æŠ¥åï¼Œè¯·ä¸è¦è¿«å®³ç©å®¶~ã€‘");
 						}
 					}
 					else {
-						CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾¿ªÊ¼Ê§°Ü£¬ÓÎÏ·ÒÑ¾­¿ªÊ¼¡¿");
+						CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å¼€å§‹å¤±è´¥ï¼Œæ¸¸æˆå·²ç»å¼€å§‹ã€‘");
 					}
 				}
 				else if (msg.msg == "*ruro reset")
 				{
 					ruroReset();
-					CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾¶íÂŞË¹ÂÖÅÌÖØÖÃÍê³É¡¿");
+					CQ_sendGroupMsg(ac, msg.fromGroup, "ã€ä¿„ç½—æ–¯è½®ç›˜é‡ç½®å®Œæˆã€‘");
 				}
 				else if (msg.msg.substr(0, 2) == "**")
 				{
@@ -199,35 +215,35 @@ void GroupMsgSub::threadMain()
 							{
 								shootTurn++;
 								if (bullet[shootTurn - 1] == true) {
-									ruroHint = "¡¾Åé¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡¿\n[CQ:at,qq=" + to_string(ruroPlayer[shootTurn-1]) + "]\n±»½ûÑÔ1·ÖÖÓ";
-									CQ_setGroupBan(ac, msg.fromGroup, msg.fromQQ, 60);//½ûÑÔ60s
+									ruroHint = "ã€ç °â€”â€”â€”â€”â€”â€”â€”â€”ã€‘\n[CQ:at,qq=" + to_string(ruroPlayer[shootTurn-1]) + "]\nè¢«ç¦è¨€1åˆ†é’Ÿ";
+									CQ_setGroupBan(ac, msg.fromGroup, msg.fromQQ, 60);//ç¦è¨€60s
 									CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
 									n--;
 								}
 								else if (bullet[shootTurn - 1] == false) {
-									CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾Ê²Ã´¶¼Ã»·¢Éú~¡¿");
+									CQ_sendGroupMsg(ac, msg.fromGroup, "ã€ä»€ä¹ˆéƒ½æ²¡å‘ç”Ÿ~ã€‘");
 								}
 
 								if (shootTurn == players) {
-									CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾¹§Ï²ĞÒ´æÕß~~ÓÎÏ·½áÊø¡¿");
+									CQ_sendGroupMsg(ac, msg.fromGroup, "ã€æ­å–œå¹¸å­˜è€…~~æ¸¸æˆç»“æŸã€‘");
 									ruroReset();
 								}
 								else if (n == 0) {
-									CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾×Óµ¯ºÄ¾¡~~ÓÎÏ·½áÊø¡¿");
+									CQ_sendGroupMsg(ac, msg.fromGroup, "ã€å­å¼¹è€—å°½~~æ¸¸æˆç»“æŸã€‘");
 									ruroReset();
 								}
 								else {
-									ruroHint = "¡¾ÂÖµ½[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]¿ªÇ¹¡¿";
+									ruroHint = "ã€è½®åˆ°[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]å¼€æªã€‘";
 									CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
 								}
 							}
 						}
 						else {
-							CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾ÄãÎ´²Î¼ÓÓÎÏ·£¬»òÉĞÎ´ÂÖµ½ÄãµÄ»ØºÏ¡¿");
+							CQ_sendGroupMsg(ac, msg.fromGroup, "ã€ä½ æœªå‚åŠ æ¸¸æˆï¼Œæˆ–å°šæœªè½®åˆ°ä½ çš„å›åˆã€‘");
 						}
 					}
 					else {
-						CQ_sendGroupMsg(ac, msg.fromGroup, "¡¾ÓÎÏ·ÉĞÎ´¿ªÊ¼¡¿");
+						CQ_sendGroupMsg(ac, msg.fromGroup, "ã€æ¸¸æˆå°šæœªå¼€å§‹ã€‘");
 					}
 				}
 
@@ -268,7 +284,7 @@ void GroupMsgSub::quite()
 
 void GroupMsgSub::pushMsg(int32_t msgId, int64_t fromGroup, int64_t fromQQ, std::string msg)
 {
-	//Èç¹û»º´æµÄÏûÏ¢´óÓÚ100Ìø  ÔòÖ±½ÓÅ×ÆúĞÂµ½µÄÏûÏ¢
+	//å¦‚æœç¼“å­˜çš„æ¶ˆæ¯å¤§äº100è·³  åˆ™ç›´æ¥æŠ›å¼ƒæ–°åˆ°çš„æ¶ˆæ¯
 	if (m_groupMsgBuffer.size() < 100)
 	{
 		m_mutex.lock();
@@ -276,5 +292,4 @@ void GroupMsgSub::pushMsg(int32_t msgId, int64_t fromGroup, int64_t fromQQ, std:
 		m_mutex.unlock();
 	}
 }
-
 
