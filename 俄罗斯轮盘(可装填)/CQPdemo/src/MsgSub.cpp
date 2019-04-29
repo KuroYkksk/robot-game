@@ -71,9 +71,11 @@ void Disorder(int64_t Player[], int player)
 	for (i = 0; i < player; i++)
 	{
 		index = rand() % (player - i) + i;
-		tmp = Player[i];
-		Player[i] = Player[index];
-		Player[index] = tmp;
+		if (index != i) {
+			tmp = Player[i];
+			Player[i] = Player[index];
+			Player[index] = tmp;
+		}
 	}
 }
 
@@ -211,32 +213,30 @@ void GroupMsgSub::threadMain()
 				if (ruroGame == true) {
 					if (ruroPlayer[shootTurn] == msg.fromQQ)
 					{
-						if (msg.msg == "**shoot")
-						{
-							shootTurn++;
-							if (bullet[shootTurn - 1] == true) {
-								ruroHint = "【砰————————】\n[CQ:at,qq=" + to_string(ruroPlayer[shootTurn-1]) + "]\n被禁言1分钟";
-								CQ_setGroupBan(ac, msg.fromGroup, msg.fromQQ, 60);//禁言60s
-								CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
-								n--;
-							}
-							else if (bullet[shootTurn - 1] == false) {
-								CQ_sendGroupMsg(ac, msg.fromGroup, "【什么都没发生~】");
-							}
-
-							if (shootTurn == players) {
-								CQ_sendGroupMsg(ac, msg.fromGroup, "【恭喜幸存者~~游戏结束】");
-								ruroReset();
-							}
-							else if (n == 0) {
-								CQ_sendGroupMsg(ac, msg.fromGroup, "【子弹耗尽~~游戏结束】");
-								ruroReset();
-								}
-							else {
-								ruroHint = "【轮到[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]开枪】";
-								CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
-							}
+						shootTurn++;
+						if (bullet[shootTurn - 1] == true) {
+							ruroHint = "【砰————————】\n[CQ:at,qq=" + to_string(ruroPlayer[shootTurn-1]) + "]\n被禁言1分钟";
+							CQ_setGroupBan(ac, msg.fromGroup, msg.fromQQ, 60);//禁言60s
+							CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
+							n--;
 						}
+						else if (bullet[shootTurn - 1] == false) {
+							CQ_sendGroupMsg(ac, msg.fromGroup, "【什么都没发生~】");
+						}
+
+						if (shootTurn == players) {
+							CQ_sendGroupMsg(ac, msg.fromGroup, "【恭喜幸存者~~游戏结束】");
+							ruroReset();
+						}
+						else if (n == 0) {
+							CQ_sendGroupMsg(ac, msg.fromGroup, "【子弹耗尽~~游戏结束】");
+							ruroReset();
+							}
+						else {
+							ruroHint = "【轮到[CQ:at,qq=" + to_string(ruroPlayer[shootTurn]) + "]开枪】";
+							CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
+						}
+
 					}
 					else {
 						CQ_sendGroupMsg(ac, msg.fromGroup, "【你未参加游戏，或尚未轮到你的回合】");
