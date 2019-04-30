@@ -207,9 +207,9 @@ void GroupMsgSub::threadMain()
 							CQ_sendGroupMsg(ac, msg.fromGroup, ruroHint.c_str());
 						}
 					}
-				}
-				else {
-					CQ_sendGroupMsg(ac, msg.fromGroup, "【你未参加游戏，或尚未轮到你的回合】");
+					else {
+						CQ_sendGroupMsg(ac, msg.fromGroup, "【你未参加游戏，或尚未轮到你的回合】");
+					}
 				}
 				else {
 					CQ_sendGroupMsg(ac, msg.fromGroup, "【游戏尚未开始】");
