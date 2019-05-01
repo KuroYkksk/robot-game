@@ -20,6 +20,7 @@ int virtualTotal = 0;		//显示的合计值
 int realTotal = 0;			//实际的合计值
 int call = 0;				//宣言值
 int realtmp = 0;			//存放实际点数
+int turn = 1;				//回合数
 
 
 //游戏重置
@@ -38,6 +39,7 @@ void STReset()
 	realTotal = 0;
 	call = 0;
 	realtmp = 0;
+	turn = 1;
 }
 //玩家乱序算法
 void Disorder(int64_t Player[], int player)
@@ -116,6 +118,7 @@ void STStart(int64_t group)
 	realTotal = 0;
 	call = 0;
 	realtmp = 0;
+	turn = 1;
 
 	//生成牌堆
 	pokerNameSet();
@@ -126,7 +129,7 @@ void STStart(int64_t group)
 	cardDisorder(pokerCard, 52);
 	for (int i = 0; i < 52; i++)
 	{
-		playerCard.push_back(i);
+		playerCard.push_back(pokerCard[i]);
 	}
 
 	string STHint = "【63点】游戏开始\n牌组设置完毕~\n";
@@ -139,21 +142,17 @@ void STStart(int64_t group)
 //游戏结果判断
 string STEndJudge(string hint)
 {
-	hint += "显示合计值【" + to_string(virtualTotal) + "/63】\n";
-	hint += "实际合计值【" + to_string(realTotal) + "/63】\n";
+	string h;
+	h = "显示合计值【" + to_string(virtualTotal) + "/63】\n";
+	h += "实际合计值【" + to_string(realTotal) + "/63】\n";
 	if (realTotal <= 63)
 	{
-		hint += "【玩家[CQ:at,qq=" + to_string(STPlayer[0]) + "]获胜~】";
+		h += "【玩家[CQ:at,qq=" + to_string(STPlayer[0]) + "]获胜~】";
 	}
 	else {
-		hint += "【玩家";
-		for (int i = 0; i < players; i++)
-		{
-			hint += "[CQ:at,qq=" + to_string(STPlayer[i]) + "]";
-		}
-		hint += "获胜~】";
+		h += "【玩家[CQ:at,qq=" + to_string(STPlayer[0]) + "]输了，其余玩家获胜~】";
 	}
-	return hint;
+	return h;
 }
 
 
@@ -296,22 +295,26 @@ void GroupMsgSub::threadMain()
 				if (STGame == true) {
 					if (STPlayer[STTurn] == msg.fromQQ)
 					{
-						STTurn++;
 						sscanf(msg.msg.c_str(), "**set %d", &call);
 
 						if (1 <= call && call <= 10) {
+							STTurn++;
 							virtualTotal += call;
 							realTotal += point(realtmp);
-							STHint = "【玩家宣言：" + to_string(call) + "点】\n当前合计值【" + to_string(virtualTotal) + "/63】";
+							STHint = "【玩家宣言：" + to_string(call) + "点】\nTURN:" + to_string(turn) + "\n当前合计值【" + to_string(virtualTotal) + "/63】";
 							CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
 
 							if (playerCard.empty())
 							{
 								STHint = "【牌组抽空，游戏结束】\n";
-								STEndJudge(STHint);
+								STHint += STEndJudge(STHint);
 							}
 							else {
-								if (STTurn == players) { STTurn = 0; } //玩家循环
+								if (STTurn == players) { 
+									//玩家循环
+									STTurn = 0;
+									turn++;
+								} 
 								STHint = "【[CQ:at,qq=" + to_string(STPlayer[STTurn]) + "]抽了一张牌】";
 								CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
 								//私聊发牌
@@ -352,13 +355,25 @@ void GroupMsgSub::threadMain()
 						if (players == 1)
 						{
 							STHint = "【玩家放弃，游戏结束】\n";
-							STEndJudge(STHint);
+							STHint += STEndJudge(STHint);
 							CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
 							STReset();
 						}
 						else {
 							STHint = "【玩家放弃，剩余" + to_string(players) + "名玩家】" ;
 							CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
+							if (STTurn == players) {
+								//玩家循环
+								STTurn = 0;
+								turn++;
+							}
+							STHint = "【[CQ:at,qq=" + to_string(STPlayer[STTurn]) + "]抽了一张牌】";
+							CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
+							//私聊发牌
+							realtmp = playerCard.back();
+							STHint = "你抽到了一张：" + pokerName(realtmp) + "\n请在群里发送(**set)【宣言/放置】或(**pass)【放弃】做出决定";
+							CQ_sendPrivateMsg(ac, STPlayer[STTurn], STHint.c_str());
+							playerCard.pop_back();
 						}
 					}
 					else {
@@ -371,7 +386,12 @@ void GroupMsgSub::threadMain()
 			}
 			if (msg.msg == "*63 rule")
 			{
-				STHint = "【63点规则】\n【63点】是使场上的共计数极限向【63点】前进的胆量对决，\n使用的是扑克牌52张（小丑牌不用），数字牌保持原状，花牌则算 10 来记数，\n每位玩家先从牌组抽一张牌，抽出的牌只能自己看，再将牌的数值【宣言】，以牌背为上【放置】到场上，\n到时候各位玩家可以讲真话，也可以说假话，\n依照这样的操作，按顺序进行，场上的共计数就会不断上升，还是混入了虚与实的共计数，\n由于这场游戏是胆量对决，所以共计数不能超过63。\n要是在自己的回合，觉得要到63了，可以选择【放弃】，选择【放弃】的人，当场游戏结束，\n像这样一人一人的退出，只留下最后一人的时候就会摊牌，\n场上真•共计数在【63】以下的话，胆量对决成功，最后留下的人会获胜，\n场上的真•共计数在【63】以上的话，胆量对决失败，最后留下的人会输掉。";
+				STHint = "【63点规则】\n【63点】是使场上的共计数极限向【63点】前进的胆量对决，\n使用的是扑克牌52张（小丑牌不用），数字牌保持原状，花牌则算 10 来记数，\n每位玩家先从牌组抽一张牌，抽出的牌只能自己看，再将牌的数值【宣言】，以牌背为上【放置】到场上，\n到时候各位玩家可以讲真话，也可以说假话，\n依照这样的操作，按顺序进行，场上的共计数就会不断上升，还是混入了虚与实的共计数，\n由于这场游戏是胆量对决，所以共计数不能超过63。\n要是在自己的回合，觉得要到63了，可以选择【放弃】，选择【放弃】的人，当场游戏结束，\n像这样一人一人的退出，只留下最后一人的时候就会摊牌，\n场上真-共计数在【63】以下的话，胆量对决成功，最后留下的人会获胜，\n场上的真-共计数在【63】以上的话，胆量对决失败，最后留下的人会输掉。";
+				CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
+			}
+			if (msg.msg == "*63 help")
+			{
+				STHint = "【63点帮助】\n加入游戏:*63 join\n退出游戏:*63 quit\n开始游戏:*63 start\n重置游戏:*63 reset\n\n宣言:**set(+任意点数)\n放弃:**pass";
 				CQ_sendGroupMsg(ac, msg.fromGroup, STHint.c_str());
 			}
 
