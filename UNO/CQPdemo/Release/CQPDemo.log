@@ -1,0 +1,16 @@
+﻿  MsgSub.cpp
+d:\g\project robot\uno\cqpdemo\src\msgsub.cpp(89): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+d:\g\project robot\uno\cqpdemo\src\msgsub.cpp(305): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(2261): note: 参见“sscanf”的声明
+d:\g\project robot\uno\cqpdemo\src\msgsub.cpp(551): warning C4018: “<”: 有符号/无符号不匹配
+d:\g\project robot\uno\cqpdemo\src\msgsub.cpp(525): warning C4101: “index”: 未引用的局部变量
+  ThreadBase.cpp
+  TransactionManagement.cpp
+  appmain.cpp
+  dllmain.cpp
+  stdafx.cpp
+    正在创建库 D:\G\project robot\uno\Release\com.example.democ.lib 和对象 D:\G\project robot\uno\Release\com.example.democ.exp
+  正在生成代码
+  All 686 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  CQPDemo.vcxproj -> D:\G\project robot\uno\Release\com.example.democ.dll
